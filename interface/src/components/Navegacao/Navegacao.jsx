@@ -8,20 +8,18 @@ import { useState, useEffect } from 'react';
 function Navegacao() {
     // criando estado para controlar a renderização condicional
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [username, setUsername] = useState('');
+    const [nomeUsuario, setNomeUsuario] = useState('');
 
     /**
     * Verifica a autenticação do usuário
     */
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const username = localStorage.getItem('username');   // recupera o token do localstorage
+        const token = localStorage.getItem('token');  // recupera o token do localstorage
         if (token && AuthRequests.checkTokenExpiry()) {  // varifica a validade do token
             setIsAuthenticated(true);  // caso o token seja válido, seta o valor de autenticação para true
-            setUsername(username);
+            setNomeUsuario(localStorage.getItem('username'));
         } else {
             setIsAuthenticated(false);  // caso o token seja inválido, seta o valor de autenticação para false
-            setUsername('');
         }
     }, []);
 
@@ -49,13 +47,9 @@ function Navegacao() {
                             <Nav className="me-auto">
                                 <Nav.Link href="/pessoas" style={estiloNavOptions}>Pessoas</Nav.Link>
                             </Nav>
-
-                            <p style={{ color: 'white', marginTop: '20px' }}>Olá, {username}</p>
-                            <Button variant='light' onClick={logout} style={{ marginLeft: '20px' }}>Sair</Button>
+                            <Nav.Item style={estiloNavOptions}>Bem-vindo, {nomeUsuario}</Nav.Item>
+                            <Button variant='light' onClick={logout}>Sair</Button>
                         </>
-
-
-
                     ) : (
                         // renderiza as opções de navegação para usuário não autenticado
                         <Button href='/login' variant='light'>Login</Button>
