@@ -2,64 +2,65 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/esm/Button';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import style from './Navegacao.jsx';
+import AuthRequests from '../../fetch/AuthRequests';
 import { useState, useEffect } from 'react';
-import { MdLogout } from "react-icons/md";
-import AuthRequests from '../../fetch/AuthRequests.js';
 
 function Navegacao() {
-    const estiloNavbar = {
-        backgroundColor: 'var(--primaryColor)',
-    };
-
-    const estiloNavOptions = {
-        color: 'var(--fontColor)',
-    };
-
-    const [username, setUsername] = useState('');
+    // criando estado para controlar a renderização condicional
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState('');
 
+    /**
+    * Verifica a autenticação do usuário
+    */
     useEffect(() => {
         const token = localStorage.getItem('token');
-        const storedUsername = localStorage.getItem('username');
-        if (token && AuthRequests.checkTokenExpiry()) {
-            setIsAuthenticated(true);
-            setUsername(storedUsername);
+        const username = localStorage.getItem('username');   // recupera o token do localstorage
+        if (token && AuthRequests.checkTokenExpiry()) {  // varifica a validade do token
+            setIsAuthenticated(true);  // caso o token seja válido, seta o valor de autenticação para true
+            setUsername(username);
         } else {
-            setIsAuthenticated(false);
+            setIsAuthenticated(false);  // caso o token seja inválido, seta o valor de autenticação para false
+            setUsername('');
         }
     }, []);
 
-    const handleLogout = () => {
+    const estiloNavbar = {
+        backgroundColor: 'var(--primaryColor)',
+    }
+
+    const estiloNavOptions = {
+        color: 'var(--fontColor)',
+    }
+
+    const logout = () => {
         AuthRequests.removeToken();
-        setIsAuthenticated(false);
-        window.location.href = '/';
-    };
+    }
 
     return (
         <>
             <Navbar style={estiloNavbar}>
                 <Container>
+                    {/* a opção Home é renderizada para todos os usuários, independente de estarem autenticados ou não */}
                     <Navbar.Brand href="/" style={estiloNavOptions}>Home</Navbar.Brand>
+                    {isAuthenticated ? ( // verifica se o usuário está autenticado (true)
+                        // renderiza as opções de navegação para usuário autenticado
+                        <>
+                            <Nav className="me-auto">
+                                <Nav.Link href="/pessoas" style={estiloNavOptions}>Pessoas</Nav.Link>
+                            </Nav>
+
+                            <p style={{ color: 'white', marginTop: '20px' }}>Olá, {username}</p>
+                            <Button variant='light' onClick={logout} style={{ marginLeft: '20px' }}>Sair</Button>
+                        </>
+
+
+
+                    ) : (
+                        // renderiza as opções de navegação para usuário não autenticado
+                        <Button href='/login' variant='light'>Login</Button>
+                    )}
                 </Container>
-                {isAuthenticated ? (
-                    <>
-                        <Nav className="me-auto">
-                            <Nav.Link href="/pessoas" style={estiloNavOptions}>Pessoas</Nav.Link>
-                        </Nav>
-                        <NavDropdown
-                            title={<span style={{ color: 'white' }}>Olá {username.split(' ')[0]}</span>}
-                            id={style.collapsibleNavDropdown}
-                        >
-                            <NavDropdown.Item onClick={handleLogout} className={style.navDropdown}>
-                                <MdLogout /> Sair
-                            </NavDropdown.Item>
-                        </NavDropdown>
-                    </>
-                ) : (
-                    <Button href='/login' variant='light'>Login</Button>
-                )}
             </Navbar>
         </>
     );
